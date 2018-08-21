@@ -14,3 +14,20 @@ jupyterlab = "^0.34.0"
 mypy = "^0.620.0"
 flake8 = "^3.5"
 pytest = "^3.7"
+black = "^18.3-alpha.0"
+
+[tool.black]
+include = '\.pyi?$'
+exclude = '''
+/(
+    \.git
+| \.mypy_cache
+| \.tox
+| \.venv
+| _build
+| buck-out
+| build
+| dist
+| notebooks
+)/
+'''

@@ -1,23 +1,35 @@
-* TODO [0/4]
-  - [-] Port already done [1/5]
+* TODO [0/5]
+  - [-] Port already done [5/7]
     - [X] Create Boilerplate
-    - [ ] Set up linting and typechecking
-    - [ ] Set up setup.cfg
+    - [X] Set up linting
+    - [X] Set up typechecking
+    - [X] Set up test
+    - [X] Set up setup.cfg
     - [ ] Clean previous env
     - [ ] Open current env
+    - [ ] Rewrite everything
 
   - [ ] Add some test [0/2]
     - [ ] Checkout dataclass github tests
     - [ ] Checkout attrs github tests
 
   - [ ] Add full signature support [0/3]
-    - [ ] New mechanism of ctors creating by parts [0/1]
-      - [ ] signature parsing -> metadata creation -> type creation
-
+    - [ ] New mechanism of ctors creating by parts [0/4]
+      - [ ] 1 - String-represented types evaluation (how mypy does it?)
+        eg:
+        @dataype
+        class Tree(Generic[A]):
+            Leaf : (A,)
+            Node : ('Tree[A]', 'Tree[A]')
+      - [ ] 2 - Signature parsing
+        eg: (A, A) -> <Signature (_0: ~A, _1: ~A)>
+      - [ ] 3 - Metadata creation
+        eg: __signature__ and __annotations__
+      - [ ] type creation
     - [ ] Flexible __repr__
-
     - [ ] Convenience `signature` and `parameter` functions [0/2]
       - [ ] decide interface
       - [ ] implement
 
-  - [ ] Add experimental 'expose' functionality
+  - [ ] Add experimental 'expose' functionality (is this too hacky?)
+  - [ ] Try to play nice with mypy
