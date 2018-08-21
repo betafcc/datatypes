@@ -3,7 +3,7 @@ from .util import make_class_dict
 __version__ = "0.1.0"
 
 
-def datatype(_cls=None, *, expose=False):
+def datatype(_cls=None, *, expose=None):
     def wrap(cls):
         metacls = type(cls)
 
@@ -11,6 +11,9 @@ def datatype(_cls=None, *, expose=False):
             ctor = metacls(ctor_name, (cls,), make_class_dict(ctor_args))
 
             setattr(cls, ctor_name, ctor)
+
+            if expose is not None:
+                expose[ctor_name] = ctor
         return cls
 
     if _cls is None:

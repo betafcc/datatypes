@@ -10,8 +10,8 @@
     - [X] Adds util
     - [X] Adds rest
 
-  - [ ] Add explorations notebook:
-    - [ ] Maybe monad
+  - [-] Add explorations notebook:
+    - [X] Maybe monad
     - [ ] Tree functor
     - [ ] Either monad
     - [ ] Functor
