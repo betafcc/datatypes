@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "datatypes"
+version = "0.1.0"
+description = ""
+authors = ["Beta Faccion <betafcc@gmail.com>"]
+
+[tool.poetry.dependencies]
+python = "*"
+
+[tool.poetry.dev-dependencies]
+ipython = "^6.5"
+tornado = "<5"
+jupyterlab = "^0.34.0"
+mypy = "^0.620.0"
+flake8 = "^3.5"
+pytest = "^3.7"
