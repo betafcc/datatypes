@@ -13,7 +13,7 @@
   - [-] Add explorations notebook:
     - [X] Maybe monad
     - [ ] Tree functor
-    - [ ] Either monad
+    - [X] Result monad
     - [ ] Functor
     - [ ] Monad
 
@@ -41,3 +41,13 @@
 
   - [ ] Add experimental 'expose' functionality (is this too hacky?)
   - [ ] Try to play nice with mypy
+
+
+* Integration with 'lazy_args' [0/2]
+  - [ ] Option @datatype(lazy_args=True)
+  - [ ] Match support
+    x, e = map(arg, 'xe')
+    match(Result.attempt(truediv, 2, 0), {
+        Ok(x) >> (x + 1),
+        Error(e) >> 0,
+    })
