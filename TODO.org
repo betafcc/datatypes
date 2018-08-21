@@ -1,5 +1,5 @@
 * TODO [0/5]
-  - [-] Port already done [6/9]
+  - [-] Port already done [7/9]
     - [X] Create Boilerplate
     - [X] Set up linting
     - [X] Set up typechecking
@@ -8,7 +8,7 @@
     - [ ] Clean previous env
     - [ ] Open current env
     - [X] Adds util
-    - [ ] Adds rest
+    - [X] Adds rest
 
   - [ ] Add some test [0/2]
     - [ ] Checkout dataclass github tests
