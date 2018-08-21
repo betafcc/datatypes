@@ -1,0 +1,23 @@
+* TODO [0/4]
+  - [-] Port already done [1/5]
+    - [X] Create Boilerplate
+    - [ ] Set up linting and typechecking
+    - [ ] Set up setup.cfg
+    - [ ] Clean previous env
+    - [ ] Open current env
+
+  - [ ] Add some test [0/2]
+    - [ ] Checkout dataclass github tests
+    - [ ] Checkout attrs github tests
+
+  - [ ] Add full signature support [0/3]
+    - [ ] New mechanism of ctors creating by parts [0/1]
+      - [ ] signature parsing -> metadata creation -> type creation
+
+    - [ ] Flexible __repr__
+
+    - [ ] Convenience `signature` and `parameter` functions [0/2]
+      - [ ] decide interface
+      - [ ] implement
+
+  - [ ] Add experimental 'expose' functionality
