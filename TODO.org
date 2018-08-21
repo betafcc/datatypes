@@ -1,14 +1,21 @@
-* TODO [0/5]
-  - [-] Port already done [7/9]
+* TODO [1/6]
+  - [X] Port already done [9/9]
     - [X] Create Boilerplate
     - [X] Set up linting
     - [X] Set up typechecking
     - [X] Set up test
     - [X] Set up setup.cfg
-    - [ ] Clean previous env
-    - [ ] Open current env
+    - [X] Clean previous env
+    - [X] Open current env
     - [X] Adds util
     - [X] Adds rest
+
+  - [ ] Add explorations notebook:
+    - [ ] Maybe monad
+    - [ ] Tree functor
+    - [ ] Either monad
+    - [ ] Functor
+    - [ ] Monad
 
   - [ ] Add some test [0/2]
     - [ ] Checkout dataclass github tests
