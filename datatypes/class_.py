@@ -1,4 +1,5 @@
 from typing import Iterable, Optional, Dict, Any, Callable
+import re
 import inspect
 
 
@@ -30,7 +31,7 @@ def make_annotations(signature: inspect.Signature) -> Dict[str, Any]:
 
 def make_repr(signature: inspect.Signature) -> Callable[[Any], str]:
     if all(
-        parameter.kind is Parameter.POSITIONAL_ONLY
+        parameter.kind is inspect.Parameter.POSITIONAL_ONLY
         for parameter in signature.parameters.values()
     ):
 
