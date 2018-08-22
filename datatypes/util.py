@@ -38,3 +38,17 @@ def make_signature(*types):
 
 def extract_annotations(signature):
     return {k: v.annotation for k, v in signature.parameters.items()}
+
+
+# TODO
+def matches(a, b):
+    """
+    Returns True if `á` structually equals `b`
+
+    eg:
+    >>> matches(2, 3)
+    True
+    >>> matches([var('x')], [3])
+    True
+    """
+    return a == b
