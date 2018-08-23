@@ -16,6 +16,7 @@
     - [X] Result monad
     - [ ] Functor
     - [ ] Monad
+    - [ ] Degrees of magic (README prototype)
 
   - [ ] Add some test [0/2]
     - [ ] Checkout dataclass github tests
