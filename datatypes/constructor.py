@@ -1,28 +1,29 @@
 import re
 import inspect
 from types import new_class
-from typing import Iterable, Optional, Dict, Any, Callable
+from typing import Optional, Mapping, Dict, Tuple, Any, Callable
 
 
 def make_contructor(
     cls_name: str,
     signature: inspect.Signature,
     *,
-    bases: Iterable[type] = (),
-    namespace: Optional[Dict[str, Any]] = None,
-    init: Optional[bool] = True,
-    repr: Optional[bool] = True,
+    bases: Tuple[type, ...] = (),
+    namespace: Optional[Mapping[str, Any]] = None,
+    init: bool = True,
+    repr: bool = True,
 ):
+    namespace_: Mapping[str, Any]
     if namespace is None:
-        namespace = {}
+        namespace_ = {}
 
-    namespace = {
+    namespace_ = {
         **make_namespace(signature, init=init, repr=repr),
-        **namespace,  # user provided namespace will be preserved
+        **namespace_,  # user provided namespace will be preserved
     }
 
     return new_class(
-        name=cls_name, bases=bases, kwds={}, exec_body=lambda ns: ns.update(namespace)
+        name=cls_name, bases=bases, kwds={}, exec_body=lambda ns: ns.update(namespace_)
     )
 
 
