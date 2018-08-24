@@ -1,8 +1,6 @@
 from types import new_class
 from typing import Generic
 
-from datatypes import datatype
-
 
 class dot_construct(type):
     def __getattr__(self, attr):
@@ -21,6 +19,8 @@ class or_(metaclass=dot_construct):
 
 class rshift(metaclass=dot_construct):
     def __rshift__(self, other):
+        from . import datatype
+
         if isinstance(self, parametrized):
             bases = (Generic[self.parameters],)
         else:

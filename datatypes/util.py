@@ -6,6 +6,10 @@ from itertools import zip_longest
 from typing import Dict, Any
 
 
+def call(f):
+    return f()
+
+
 def parse_signature(signature: str) -> inspect.Signature:
     locals().update(get_environment(1))
 

@@ -2,11 +2,33 @@ from typing import Optional, Dict, Any
 
 from .annotations import annotations_to_signatures
 from .constructor import make_constructor
+from .magic import data
+from .util import call
+
 
 __version__ = "0.1.0"
 
 
-def datatype(
+@call
+class datatype:
+    def __call__(
+        self,
+        _cls: Optional[type] = None,
+        *,
+        init: bool = True,
+        repr: bool = True,
+        expose: Optional[Dict[str, Any]] = None,
+    ):
+        return _datatype(_cls=_cls, init=init, repr=repr, expose=expose)
+
+    def __repr__(self):
+        return self.__class__.__name__
+
+    def __getattr__(self, name):
+        return data(name)
+
+
+def _datatype(
     _cls: Optional[type] = None,
     *,
     init: bool = True,
@@ -34,10 +56,10 @@ def _process_class(cls: type, init: bool, repr: bool, expose: Dict[str, Any]):
         constructors.append(constructor)
         if should_expose:
             expose[cls_name] = constructor
-    setattr(cls, '_constructors', constructors)
+    setattr(cls, "_constructors", constructors)
 
     def init_(*args, **kwargs):
         raise TypeError("Can't instantiate datatype, use one of the constructors")
 
-    setattr(cls, '__init__', init_)
+    setattr(cls, "__init__", init_)
     return cls
