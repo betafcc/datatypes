@@ -23,12 +23,21 @@ def datatype(
 
 def _process_class(cls: type, init: bool, repr: bool, expose: Dict[str, Any]):
     should_expose = expose is not None
+
+    constructors = []
     for cls_name, signature in annotations_to_signatures(cls.__annotations__).items():
         constructor = make_constructor(
             cls_name=cls_name, signature=signature, bases=(cls,), init=init, repr=repr
         )
 
         setattr(cls, cls_name, constructor)
+        constructors.append(constructor)
         if should_expose:
             expose[cls_name] = constructor
+    setattr(cls, '_constructors', constructors)
+
+    def init_(*args, **kwargs):
+        raise TypeError("Can't instantiate datatype, use one of the constructors")
+
+    setattr(cls, '__init__', init_)
     return cls
