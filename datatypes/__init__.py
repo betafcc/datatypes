@@ -1,4 +1,5 @@
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, Type, Callable
+from operator import setitem
 
 from .annotations import annotations_to_signatures
 from .constructor import make_constructor
@@ -18,8 +19,11 @@ class datatype:
         init: bool = True,
         repr: bool = True,
         expose: Optional[Dict[str, Any]] = None,
+        expose_with: Callable[[Any, str, Type], None] = setitem,
     ):
-        return _datatype(_cls=_cls, init=init, repr=repr, expose=expose)
+        return _datatype(
+            _cls=_cls, init=init, repr=repr, expose=expose, expose_with=expose_with
+        )
 
     def __repr__(self):
         return self.__class__.__name__
@@ -29,21 +33,30 @@ class datatype:
 
 
 def _datatype(
-    _cls: Optional[type] = None,
+    _cls: Optional[type],
     *,
-    init: bool = True,
-    repr: bool = True,
-    expose: Optional[Dict[str, Any]] = None,
+    init: bool,
+    repr: bool,
+    expose: Optional[Dict[str, Any]],
+    expose_with: Callable[[Any, str, Type], None],
 ):
     def wrap(cls):
-        return _process_class(cls, init=init, repr=repr, expose=expose)
+        return _process_class(
+            cls, init=init, repr=repr, expose=expose, expose_with=expose_with
+        )
 
     if _cls is None:
         return wrap
     return wrap(_cls)
 
 
-def _process_class(cls: type, init: bool, repr: bool, expose: Dict[str, Any]):
+def _process_class(
+    cls: type,
+    init: bool,
+    repr: bool,
+    expose: Dict[str, Any],
+    expose_with: Callable[[Any, str, Type], None],
+):
     should_expose = expose is not None
 
     constructors = []
@@ -55,7 +68,7 @@ def _process_class(cls: type, init: bool, repr: bool, expose: Dict[str, Any]):
         setattr(cls, cls_name, constructor)
         constructors.append(constructor)
         if should_expose:
-            expose[cls_name] = constructor
+            expose_with(expose, cls_name, constructor)
     setattr(cls, "_constructors", constructors)
 
     def init_(*args, **kwargs):
