@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Dict, Any
 
 from .annotations import annotations_to_signatures
 from .constructor import make_constructor
@@ -6,20 +6,31 @@ from .constructor import make_constructor
 __version__ = "0.1.0"
 
 
-def datatype(_cls: Optional[type] = None, *, init: bool = True, repr: bool = True):
+def datatype(
+    _cls: Optional[type] = None,
+    *,
+    init: bool = True,
+    repr: bool = True,
+    expose: Optional[Dict[str, Any]] = None,
+):
     def wrap(cls):
-        return _process_class(cls, init=init, repr=repr)
+        return _process_class(cls, init=init, repr=repr, expose=expose)
 
     if _cls is None:
         return wrap
     return wrap(_cls)
 
 
-def _process_class(cls: type, init: bool, repr: bool):
+def _process_class(
+    cls: type, init: bool, repr: bool, expose: Optional[Dict[str, Any]] = None
+):
+    should_expose = expose is not None
     for cls_name, signature in annotations_to_signatures(cls.__annotations__).items():
         constructor = make_constructor(
             cls_name=cls_name, signature=signature, bases=(cls,), init=init, repr=repr
         )
 
         setattr(cls, cls_name, constructor)
+        if should_expose:
+            expose[cls_name] = constructor
     return cls
