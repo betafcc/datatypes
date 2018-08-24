@@ -13,7 +13,7 @@ def make_constructor(
     namespace: Optional[Mapping[str, Any]] = None,
     init: bool = True,
     repr: bool = True,
-) -> Callable:
+) -> type:
     namespace_: Mapping[str, Any]
     if namespace is None:
         namespace_ = {}
@@ -32,9 +32,9 @@ def make_constructor(
     # the only real reason if to maintain consistency with the behavior with frozen=True
     cls = dataclass(frozen=True, init=False, repr=False, eq=False)(cls)
 
-    if namespace_["_no_parameters_constructor"]:
-        # NOTE: THIS IS WEIRD AND MAY CHANGE
-        cls = cls()
+    # if namespace_["_no_parameters_constructor"]:
+    #     # NOTE: THIS IS WEIRD AND MAY CHANGE
+    #     cls = cls()
 
     return cls
 
@@ -51,15 +51,15 @@ def make_namespace(
         namespace["__init__"] = make_init(signature)
     if repr:
         namespace["__repr__"] = make_repr(signature)
-    if not len(signature.parameters):
-        # Constructors with no parameters shall be idempotent in construction
-        # The reason is so `Nothing is Nothing()` and `match` and `fold` dont
-        # need a awkward `{Nothing(): ...}`
-        # NOTE: this may change
-        namespace["__call__"] = lambda self: self
-        namespace["_no_parameters_constructor"] = True
-    else:
-        namespace["_no_parameters_constructor"] = False
+    # if not len(signature.parameters):
+    #     # Constructors with no parameters shall be idempotent in construction
+    #     # The reason is so `Nothing is Nothing()` and `match` and `fold` dont
+    #     # need a awkward `{Nothing(): ...}`
+    #     # NOTE: this may change
+    #     namespace["__call__"] = lambda self: self
+    #     namespace["_no_parameters_constructor"] = True
+    # else:
+    #     namespace["_no_parameters_constructor"] = False
     return namespace
 
 
@@ -78,12 +78,12 @@ def make_annotations(signature: inspect.Signature) -> Dict[str, Any]:
 
 
 def make_repr(signature: inspect.Signature) -> Callable[[Any], str]:
-    if not len(signature.parameters):
-        # NOTE: this is weird and may change
-        def _repr(self):
-            return self.__class__.__qualname__
+    # if not len(signature.parameters):
+    #     # NOTE: this is weird and may change
+    #     def _repr(self):
+    #         return self.__class__.__qualname__
 
-    elif all(
+    if all(
         parameter.kind is inspect.Parameter.POSITIONAL_ONLY
         for parameter in signature.parameters.values()
     ):
