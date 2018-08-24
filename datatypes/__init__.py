@@ -1,27 +1,30 @@
-# from .util import make_class_dict
+from typing import Optional
+from .annotations import annotations_to_signatures
+from .constructor import make_constructor
 
 __version__ = "0.1.0"
 
 
-# def datatype(_cls=None, *, expose=None):
-#     def wrap(cls):
-#         metacls = type(cls)
+def datatype(_cls: Optional[type] = None, *, init: bool = True, repr: bool = True):
+    def wrap(cls):
+        return _process_class(cls, init=init, repr=repr)
 
-#         for ctor_name, ctor_args in cls.__annotations__.items():
-#             ctor = metacls(ctor_name, (cls,), make_class_dict(ctor_args))
-
-#             setattr(cls, ctor_name, ctor)
-
-#             if expose is not None:
-#                 expose[ctor_name] = ctor
-#         return cls
-
-#     if _cls is None:
-#         return wrap
-#     return wrap(_cls)
+    if _cls is None:
+        return wrap
+    return wrap(_cls)
 
 
-# def match(obj, cases):
-#     for type, handler in cases.items():
-#         if isinstance(obj, type):
-#             return handler(*obj._bound_signature.args)
+def _process_class(cls: type, init: bool, repr: bool):
+    for cls_name, signature in annotations_to_signatures(cls.__annotations__).items():
+        setattr(
+            cls,
+            cls_name,
+            make_constructor(
+                cls_name=cls_name,
+                signature=signature,
+                bases=(cls,),
+                init=init,
+                repr=repr,
+            ),
+        )
+    return cls

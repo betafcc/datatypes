@@ -4,7 +4,7 @@ from types import new_class
 from typing import Optional, Mapping, Dict, Tuple, Any, Callable
 
 
-def make_contructor(
+def make_constructor(
     cls_name: str,
     signature: inspect.Signature,
     *,
@@ -61,12 +61,15 @@ def make_repr(signature: inspect.Signature) -> Callable[[Any], str]:
     ):
 
         def _repr(self):
-            return self.__class__.__qualname__ + ", ".join(
-                map(repr, self._bound_signature.args)
+            return (
+                self.__class__.__qualname__
+                + "("
+                + ", ".join(map(repr, self._bound_signature.args))
+                + ")"
             )
 
     else:
-
+        # FIXME: super hacky, parsing Signature.__repr__ result
         def _repr(self):
             return (
                 self.__class__.__qualname__
