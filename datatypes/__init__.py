@@ -1,4 +1,5 @@
 from typing import Optional
+
 from .annotations import annotations_to_signatures
 from .constructor import make_constructor
 
@@ -16,15 +17,9 @@ def datatype(_cls: Optional[type] = None, *, init: bool = True, repr: bool = Tru
 
 def _process_class(cls: type, init: bool, repr: bool):
     for cls_name, signature in annotations_to_signatures(cls.__annotations__).items():
-        setattr(
-            cls,
-            cls_name,
-            make_constructor(
-                cls_name=cls_name,
-                signature=signature,
-                bases=(cls,),
-                init=init,
-                repr=repr,
-            ),
+        constructor = make_constructor(
+            cls_name=cls_name, signature=signature, bases=(cls,), init=init, repr=repr
         )
+
+        setattr(cls, cls_name, constructor)
     return cls

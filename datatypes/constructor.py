@@ -1,6 +1,7 @@
 import re
 import inspect
 from types import new_class
+from dataclasses import dataclass
 from typing import Optional, Mapping, Dict, Tuple, Any, Callable
 
 
@@ -22,16 +23,24 @@ def make_constructor(
         **namespace_,  # user provided namespace will be preserved
     }
 
-    return new_class(
+    cls = new_class(
         name=cls_name, bases=bases, kwds={}, exec_body=lambda ns: ns.update(namespace_)
     )
+
+    # Kind of indiferent if use dataclass here
+    # the only real reason if to maintain consistency with the behavior with frozen=True
+    cls = dataclass(frozen=True, init=False, repr=False, eq=False)(cls)
+
+    return cls
 
 
 def make_namespace(
     signature: inspect.Signature, init: bool, repr: bool
 ) -> Dict[str, Any]:
     namespace = dict(
-        __annotations__=make_annotations(signature), __signature__=signature
+        __annotations__=make_annotations(signature),
+        __signature__=signature,
+        __eq__=lambda self, other: self._bound_signature == other._bound_signature,
     )
     if init:
         namespace["__init__"] = make_init(signature)
@@ -45,7 +54,7 @@ def make_init(signature: inspect.Signature) -> Callable[..., None]:
         bound = signature.bind(*args, **kwargs)
         bound.apply_defaults()
 
-        self._bound_signature = bound
+        object.__setattr__(self, "_bound_signature", bound)
 
     return _init
 
