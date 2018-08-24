@@ -78,3 +78,22 @@ class atom(metaclass=boson):
 
     def __repr__(self):
         return self._name
+
+    def _ismatch_(self, other):
+        return True
+
+
+def ismatch(a: Any, b: Any) -> bool:
+    if a is b:  # may be unnecessary given next check
+        return True
+    if a == b:
+        return True
+    if a is ... or b is ...:
+        return True
+
+    if hasattr(a, "_ismatch_"):
+        return a._ismatch_(b)
+    if hasattr(b, "_ismatch_"):
+        return b._ismatch_(a)
+
+    return False
