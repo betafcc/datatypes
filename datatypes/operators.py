@@ -7,15 +7,17 @@ class NoMatchException(TypeError):
 
 
 def fold(obj, cases: Mapping[Any, Callable]):
-    cases = OrderedDict(cases)
-    for case in cases:
-        if isinstance(obj, case):
-            match = case
-    else:
-        if ... in cases:
-            match = ...
-        else:
-            raise NoMatchException(f'No case provided for "{obj}" instance')
-
     sig = obj._bound_signature
-    return cases[match](*sig.args, **sig.kwargs)
+    cases = OrderedDict(cases)
+    default = cases.pop(
+        ..., None
+    )  # Need to pop it here so `isinstance` doesnt complain
+
+    for case, handler in cases.items():
+        if isinstance(obj, case):
+            return handler(*sig.args, **sig.kwargs)
+
+    if default is not None:
+        return default(*sig.args, **sig.kwargs)
+
+    raise NoMatchException(f'No case provided for "{obj}" instance')
