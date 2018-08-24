@@ -1,6 +1,8 @@
 import inspect
 from dataclasses import FrozenInstanceError
 from functools import reduce, lru_cache
+from collections import abc
+from itertools import zip_longest
 from typing import Dict, Any
 
 
@@ -84,6 +86,27 @@ class atom(metaclass=boson):
 
 
 def ismatch(a: Any, b: Any) -> bool:
+    # print(f"{a} ~= {b}")
+
+    # try:
+    #     if hasattr(a, "_ismatch_"):
+    #         _r = a._ismatch_(b)
+    #         if not isinstance(_r, bool):
+    #             return False
+    #         return _r
+    #     if hasattr(b, "_ismatch_"):
+    #         _r = b._ismatch_(a)
+    #         if not isinstance(_r, bool):
+    #             return False
+    #         return _r
+    # except TypeError:
+    #     return False
+
+    if hasattr(type(a), '_ismatch_'):
+        return bool(a._ismatch_(b))
+    elif hasattr(type(b), '_ismatch_'):
+        return bool(b._ismatch_(a))
+
     if a is b:  # may be unnecessary given next check
         return True
     if a == b:
@@ -91,9 +114,16 @@ def ismatch(a: Any, b: Any) -> bool:
     if a is ... or b is ...:
         return True
 
-    if hasattr(a, "_ismatch_"):
-        return a._ismatch_(b)
-    if hasattr(b, "_ismatch_"):
-        return b._ismatch_(a)
+    if type(a) == type(b):
+        if isinstance(a, set):  # TODO
+            raise NotImplementedError("ismatch not implemented for set subclasses")
+        if isinstance(a, dict):
+            return (set(a.keys()) == set(b.keys())) and all(
+                ismatch(a[k], b[k]) for k in a.keys()
+            )
+        if isinstance(a, abc.Sequence):
+            return all(ismatch(_a, _b) for _a, _b in zip_longest(a, b))
+        if isinstance(a, inspect.BoundArguments):
+            return ismatch(a.args, b.args) and ismatch(a.kwargs, b.kwargs)
 
     return False

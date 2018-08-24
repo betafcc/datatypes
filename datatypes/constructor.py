@@ -4,6 +4,8 @@ from types import new_class
 from dataclasses import dataclass
 from typing import Optional, Mapping, Dict, Tuple, Any, Callable
 
+from .util import ismatch
+
 
 def make_constructor(
     cls_name: str,
@@ -46,6 +48,10 @@ def make_namespace(
         __annotations__=make_annotations(signature),
         __signature__=signature,
         __eq__=lambda self, other: self._bound_signature == other._bound_signature,
+        _ismatch_=lambda self, other: (
+            type(self) == type(other)
+            and ismatch(self._bound_signature, other._bound_signature)
+        ),
     )
     if init:
         namespace["__init__"] = make_init(signature)
