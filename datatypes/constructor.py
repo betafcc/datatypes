@@ -13,7 +13,7 @@ def make_constructor(
     namespace: Optional[Mapping[str, Any]] = None,
     init: bool = True,
     repr: bool = True,
-):
+) -> Callable:
     namespace_: Mapping[str, Any]
     if namespace is None:
         namespace_ = {}
@@ -23,6 +23,7 @@ def make_constructor(
         **namespace_,  # user provided namespace will be preserved
     }
 
+    cls: Any
     cls = new_class(
         name=cls_name, bases=bases, kwds={}, exec_body=lambda ns: ns.update(namespace_)
     )
@@ -31,7 +32,7 @@ def make_constructor(
     # the only real reason if to maintain consistency with the behavior with frozen=True
     cls = dataclass(frozen=True, init=False, repr=False, eq=False)(cls)
 
-    if cls._no_parameters_constructor:
+    if namespace_["_no_parameters_constructor"]:
         # NOTE: THIS IS WEIRD AND MAY CHANGE
         cls = cls()
 

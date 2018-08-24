@@ -21,9 +21,7 @@ def datatype(
     return wrap(_cls)
 
 
-def _process_class(
-    cls: type, init: bool, repr: bool, expose: Optional[Dict[str, Any]] = None
-):
+def _process_class(cls: type, init: bool, repr: bool, expose: Dict[str, Any]):
     should_expose = expose is not None
     for cls_name, signature in annotations_to_signatures(cls.__annotations__).items():
         constructor = make_constructor(

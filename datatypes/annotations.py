@@ -48,7 +48,11 @@ def annotation_to_tuple(a: Annotation) -> Tuple[Annotation, ...]:
 
 
 def tuple_to_signature(t: Tuple[Annotation, ...]) -> Signature:
-    return Signature([
-        Parameter(name=f"_{n}", kind=Parameter.POSITIONAL_ONLY, annotation=annotation)
-        for n, annotation in enumerate(t)
-    ])
+    return Signature(
+        [
+            Parameter(
+                name=f"_{n}", kind=Parameter.POSITIONAL_ONLY, annotation=annotation
+            )
+            for n, annotation in enumerate(t)
+        ]
+    )
