@@ -57,15 +57,13 @@ def get_environment(from_level: int) -> Dict[str, Any]:
     return reduce(lambda acc, n: {**acc, **n}, reversed(acc), {})
 
 
-class boson(type):
-    def __new__(meta, clsname, bases, clsdict):
-        return super().__new__(meta, clsname, bases, clsdict)
-
+# NOTE: for some reason if I `from .magic import dot_construct`, mypy complains
+class dot_construct(type):
     def __getattr__(self, attr):
         return self(attr)
 
 
-class atom(metaclass=boson):
+class atom(metaclass=dot_construct):
     @lru_cache(None)  # TODO: cache with weakmap? Add __hash__?
     def __new__(cls, name):
         instance = super().__new__(cls)
@@ -102,9 +100,9 @@ def ismatch(a: Any, b: Any) -> bool:
     # except TypeError:
     #     return False
 
-    if hasattr(type(a), '_ismatch_'):
+    if hasattr(type(a), "_ismatch_"):
         return bool(a._ismatch_(b))
-    elif hasattr(type(b), '_ismatch_'):
+    elif hasattr(type(b), "_ismatch_"):
         return bool(b._ismatch_(a))
 
     if a is b:  # may be unnecessary given next check
