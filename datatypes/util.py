@@ -1,5 +1,6 @@
 import inspect
-from functools import reduce
+from dataclasses import FrozenInstanceError
+from functools import reduce, lru_cache
 from typing import Dict, Any
 
 
@@ -52,3 +53,28 @@ def get_environment(from_level: int) -> Dict[str, Any]:
             break
     # reduce from module level to inner scopes
     return reduce(lambda acc, n: {**acc, **n}, reversed(acc), {})
+
+
+class boson(type):
+    def __new__(meta, clsname, bases, clsdict):
+        return super().__new__(meta, clsname, bases, clsdict)
+
+    def __getattr__(self, attr):
+        return self(attr)
+
+
+class atom(metaclass=boson):
+    @lru_cache(None)  # TODO: cache with weakmap? Add __hash__?
+    def __new__(cls, name):
+        instance = super().__new__(cls)
+        object.__setattr__(instance, "_name", name)
+        return instance
+
+    def __setattr__(self, attr, value):
+        raise FrozenInstanceError
+
+    def __delattr__(self, attr):
+        raise FrozenInstanceError
+
+    def __repr__(self):
+        return self._name

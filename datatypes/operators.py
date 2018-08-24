@@ -2,7 +2,7 @@ from collections import OrderedDict
 from typing import Mapping, Callable, Any
 
 
-class NoMatchException(TypeError):
+class NoMatchException(Exception):
     pass
 
 
