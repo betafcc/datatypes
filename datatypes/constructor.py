@@ -1,6 +1,7 @@
-from typing import Iterable, Optional, Dict, Any, Callable
 import re
 import inspect
+from types import new_class
+from typing import Iterable, Optional, Dict, Any, Callable
 
 
 def make_contructor(
@@ -12,7 +13,30 @@ def make_contructor(
     init: Optional[bool] = True,
     repr: Optional[bool] = True,
 ):
-    pass
+    if namespace is None:
+        namespace = {}
+
+    namespace = {
+        **make_namespace(signature, init=init, repr=repr),
+        **namespace,  # user provided namespace will be preserved
+    }
+
+    return new_class(
+        name=cls_name, bases=bases, kwds={}, exec_body=lambda ns: ns.update(namespace)
+    )
+
+
+def make_namespace(
+    signature: inspect.Signature, init: bool, repr: bool
+) -> Dict[str, Any]:
+    namespace = dict(
+        __annotations__=make_annotations(signature), __signature__=signature
+    )
+    if init:
+        namespace["__init__"] = make_init(signature)
+    if repr:
+        namespace["__repr__"] = make_repr(signature)
+    return namespace
 
 
 def make_init(signature: inspect.Signature) -> Callable[..., None]:
