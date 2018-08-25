@@ -3,13 +3,13 @@ from typing import Generic
 
 
 class dot_construct(type):
-    def __getattr__(self, attr):
-        return self(attr)
+    def __getattr__(cls, attr):
+        return cls(attr)
 
 
 class iter_constructors(type):
-    def __iter__(self):
-        yield from self._constructors
+    def __iter__(cls):
+        yield from cls._constructors
 
 
 class or_(metaclass=dot_construct):

@@ -71,8 +71,8 @@ def get_environment(from_level: int) -> Dict[str, Any]:
 
 # NOTE: for some reason if I `from .magic import dot_construct`, mypy complains
 class dot_construct(type):
-    def __getattr__(self, attr):
-        return self(attr)
+    def __getattr__(cls, attr):
+        return cls(attr)
 
 
 class atom(metaclass=dot_construct):
