@@ -25,7 +25,7 @@ def concat(
     return (l_ismatch and r_ismatch, l_map + r_map)
 
 
-compare.concat = concat
+compare.concat = concat  # type: ignore
 
 
 @singledispatch
@@ -33,6 +33,16 @@ def homo_compare(a, b) -> Tuple[bool, List[Tuple]]:
     return (a == b, [])
 
 
-@homo_compare.register
+@homo_compare.register  # type: ignore
 def _(a: collections.abc.Sequence, b: collections.abc.Sequence):
     return reduce(concat, map(compare, a, b), (len(a) == len(b), []))
+
+
+@homo_compare.register  # type: ignore
+def _(a: dict, b: dict):
+    keys_a, keys_b = set(a), set(b)
+    keys_ab = keys_a.intersection(keys_b)
+
+    return reduce(
+        concat, (compare(a[k], b[k]) for k in keys_ab), (keys_a == keys_b, [])
+    )
