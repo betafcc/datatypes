@@ -3,11 +3,19 @@ from dataclasses import FrozenInstanceError
 from functools import reduce, lru_cache
 from collections import abc
 from itertools import zip_longest
-from typing import Dict, Any
+from typing import Dict, Any, Type, Callable
 
 
 def call(f):
     return f()
+
+
+def method(cls: Type) -> Callable[[Callable], Callable]:
+    def _method(f):
+        setattr(cls, f.__name__, f)
+        return f
+
+    return _method
 
 
 def parse_signature(signature: str) -> inspect.Signature:
