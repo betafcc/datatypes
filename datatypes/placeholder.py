@@ -7,24 +7,44 @@ class placeholder_meta(type):
         return KeywordOnlyPlaceholder(attr)
 
     def __getitem__(cls, item):
+        # eg _[0] -> `0
         if isinstance(item, int):
             return PositionalOnlyPlaceholder(item)
+
+        # eg _['x':int:42] -> `x:int=42
+        if isinstance(item, slice):
+            return KeywordOnlyPlaceholder(*_fill_slice(item))
+
         if isinstance(item, tuple) and len(item) == 2:
             position, keyword = item
+
+            # eg _[3, 'x'] -> `3.x
             if isinstance(keyword, str):
                 return PositionalOrKeywordPlaceholder(position, keyword)
-            name, annotation, default = keyword.start, keyword.stop, keyword.step
-            if annotation is None:
-                annotation = Parameter.empty
-            if default is None:
-                default = Parameter.empty
-            return PositionalOrKeywordPlaceholder(position, name, annotation, default)
+
+            # eg _[3, 'x':int:42] -> `3.x:int=42
+            return PositionalOrKeywordPlaceholder(position, *_fill_slice(keyword))
 
         raise NotImplementedError
+
+    def __call__(cls, *args, **kwargs):
+        return "hello"
 
 
 class placeholder(metaclass=placeholder_meta):
     pass
+
+
+def _fill_slice(s):
+    name, annotation, default = s.start, s.stop, s.step
+
+    if annotation is None:
+        annotation = Parameter.empty
+
+    if default is None:
+        default = Parameter.empty
+
+    return (name, annotation, default)
 
 
 class Placeholder:
@@ -34,11 +54,24 @@ class Placeholder:
 
 
 class KeywordOnlyPlaceholder(Placeholder):
-    def __init__(self, name):
-        self.__parameter = Parameter(name, kind=Parameter.KEYWORD_ONLY)
+    def __init__(self, name, annotation=Parameter.empty, default=Parameter.empty):
+        self.__parameter = Parameter(
+            name, kind=Parameter.KEYWORD_ONLY, annotation=annotation, default=default
+        )
 
     def __repr__(self):
-        return f"`{self.__parameter.name}"
+        name, annotation, default = (
+            self.__parameter.name,
+            self.__parameter.annotation,
+            self.__parameter.default,
+        )
+
+        acc = f"`{name}"
+        if annotation is not Parameter.empty:
+            acc += f":{annotation}"
+        if default is not Parameter.empty:
+            acc += f"={default}"
+        return acc
 
 
 class PositionalOnlyPlaceholder(Placeholder):
