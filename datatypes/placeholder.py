@@ -1,6 +1,8 @@
 from inspect import Parameter
 from functools import lru_cache
 
+from .expression import LazyOperations
+
 
 class placeholder_meta(type):
     def __getattr__(cls, attr):
@@ -28,7 +30,7 @@ class placeholder_meta(type):
         raise NotImplementedError
 
     def __call__(cls, *args, **kwargs):
-        return "hello"
+        return FunctionOrArguments(*args, **kwargs)
 
 
 class placeholder(metaclass=placeholder_meta):
@@ -47,7 +49,7 @@ def _fill_slice(s):
     return (name, annotation, default)
 
 
-class Placeholder:
+class Placeholder(LazyOperations):
     @lru_cache(None)
     def __new__(cls, *args, **kwargs):
         return super().__new__(cls)
