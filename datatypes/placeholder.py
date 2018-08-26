@@ -2,6 +2,31 @@ from inspect import Parameter
 from functools import lru_cache
 
 
+class placeholder_meta(type):
+    def __getattr__(cls, attr):
+        return KeywordOnlyPlaceholder(attr)
+
+    def __getitem__(cls, item):
+        if isinstance(item, int):
+            return PositionalOnlyPlaceholder(item)
+        if isinstance(item, tuple) and len(item) == 2:
+            position, keyword = item
+            if isinstance(keyword, str):
+                return PositionalOrKeywordPlaceholder(position, keyword)
+            name, annotation, default = keyword.start, keyword.stop, keyword.step
+            if annotation is None:
+                annotation = Parameter.empty
+            if default is None:
+                default = Parameter.empty
+            return PositionalOrKeywordPlaceholder(position, name, annotation, default)
+
+        raise NotImplementedError
+
+
+class placeholder(metaclass=placeholder_meta):
+    pass
+
+
 class Placeholder:
     @lru_cache(None)
     def __new__(cls, *args, **kwargs):
@@ -50,12 +75,3 @@ class PositionalOrKeywordPlaceholder(Placeholder):
         if default is not Parameter.empty:
             acc += f"={default}"
         return acc
-
-
-class placeholder_meta(type):
-    def __getattr__(cls, attr):
-        return Parameter(attr, kind=Parameter.KEYWORD_ONLY)
-
-
-class placeholder(metaclass=placeholder_meta):
-    pass
