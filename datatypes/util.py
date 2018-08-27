@@ -1,6 +1,5 @@
 import inspect
-from dataclasses import FrozenInstanceError
-from functools import reduce, lru_cache
+from functools import reduce
 from collections import abc
 from itertools import zip_longest
 from typing import Dict, Any, Type, Callable
@@ -10,9 +9,9 @@ def call(f):
     return f()
 
 
-def method(cls: Type) -> Callable[[Callable], Callable]:
+def method(cls: Type, name: str = None) -> Callable[[Callable], Callable]:
     def _method(f):
-        setattr(cls, f.__name__, f)
+        setattr(cls, name or f.__name__, f)
         return f
 
     return _method
@@ -69,32 +68,6 @@ def get_environment(from_level: int) -> Dict[str, Any]:
     return reduce(lambda acc, n: {**acc, **n}, reversed(acc), {})
 
 
-# NOTE: for some reason if I `from .magic import dot_construct`, mypy complains
-class dot_construct(type):
-    def __getattr__(cls, attr):
-        return cls(attr)
-
-
-class atom(metaclass=dot_construct):
-    @lru_cache(None)  # TODO: cache with weakmap? Add __hash__?
-    def __new__(cls, name):
-        instance = super().__new__(cls)
-        object.__setattr__(instance, "_name", name)
-        return instance
-
-    def __setattr__(self, attr, value):
-        raise FrozenInstanceError
-
-    def __delattr__(self, attr):
-        raise FrozenInstanceError
-
-    def __repr__(self):
-        return self._name
-
-    def _ismatch_(self, other):
-        return True
-
-
 def ismatch(a: Any, b: Any) -> bool:
     # print(f"{a} ~= {b}")
 
@@ -137,3 +110,12 @@ def ismatch(a: Any, b: Any) -> bool:
             return ismatch(a.args, b.args) and ismatch(a.kwargs, b.kwargs)
 
     return False
+
+
+def slice_repr(s):
+    if not isinstance(s, slice):
+        return repr(s)
+
+    _ = (s.start, s.stop, s.step)
+    _ = (repr(v) if v is not None else "" for v in _)
+    return ":".join(_)
