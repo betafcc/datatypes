@@ -4,4 +4,9 @@ from datatypes.placeholder import Placeholder
 
 
 def placeholders(obj: Any) -> Iterator[Placeholder]:
-    yield from type(obj)._placeholders_(obj)
+    try:
+        handler = type(obj)._placeholders_
+    except AttributeError:
+        handler = lambda obj: []
+
+    yield from handler(obj)
