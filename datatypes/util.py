@@ -4,15 +4,16 @@ from functools import reduce
 from itertools import zip_longest
 from operator import eq
 from typing import (
-    Dict,
     Any,
-    Type,
     Callable,
+    Dict,
     Generic,
-    TypeVar,
     Iterable,
-    Tuple,
     Iterator,
+    Tuple,
+    Type,
+    TypeVar,
+    Union,
 )
 
 
@@ -137,14 +138,6 @@ def slice_repr(s):
 
 
 class UnhasheableKeysMapping(Generic[A, B], abc.MutableMapping):
-    @classmethod
-    def from_getitem_arg(cls, arg: Tuple[slice, ...]):
-        if isinstance(arg, slice):
-            arg = (arg,)
-        elif isinstance(arg, tuple):
-            return cls([(s.start, s.stop) for s in arg])
-        raise TypeError
-
     def __init__(
         self, items: Iterable[Tuple[A, B]] = None, eq: Callable[[A, Any], bool] = eq
     ) -> None:
@@ -152,6 +145,14 @@ class UnhasheableKeysMapping(Generic[A, B], abc.MutableMapping):
             items = []
         self._items = list(items)
         self._eq = eq
+
+    @classmethod
+    def from_getitem_arg(cls, arg: Union[slice, Tuple[slice, ...]]):
+        if isinstance(arg, slice):
+            arg = (arg,)
+        if isinstance(arg, tuple):
+            return cls([(s.start, s.stop) for s in arg])
+        raise TypeError
 
     def __getitem__(self, key: A) -> B:
         for k, v in self._items:

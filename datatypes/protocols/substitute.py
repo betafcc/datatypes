@@ -5,10 +5,12 @@ from functools import singledispatch
 from datatypes.util import UnhasheableKeysMapping
 
 
-class substitute:
-    def __new__(cls, obj, cases=None):
+class substitute(object):
+    _obj : Any
+
+    def __new__(cls, obj: Any, cases=None):
         if cases is None:
-            self = super().__new__(cls)
+            self = super().__new__(object)
             self._obj = obj
             return self
 
@@ -40,11 +42,11 @@ def default_substitute_handler(obj, cases):
     return cases.get(obj, obj)
 
 
-@default_substitute_handler.register(dict)
+@default_substitute_handler.register(dict)  # type: ignore
 def _(obj, cases):
     return {k: substitute(v, cases) for k, v in obj.items()}
 
 
-@default_substitute_handler.register(list)
+@default_substitute_handler.register(list)  # type: ignore
 def _(obj, cases):
     return [substitute(el, cases) for el in obj]
