@@ -1,14 +1,23 @@
-from abc import ABCMeta
+from abc import ABCMeta, abstractmethod
 from inspect import Parameter
 from functools import lru_cache
 
 from .util import slice_repr
 
 
-class placeholders:
+class protocol(metaclass=ABCMeta):
+    """
+    This is a tool to design protocols with an associated function,
+    is more or less based on the cls.__len__ -> len and cls.__iter__ -> iter
+    pattern, mixed with some 'trait' style concepts
+
+    This probably will change
+    """
+
     # As of now, the protocol is implemented via
-    # a hidden field prefixed with '~' in the class,
-    # it works like the '@@' Symbols in JS
+    # a hidden field prefixed with '~' in the class by convention,
+    # it works like the '@@' Symbols in JS, and 'protocol' subclasses
+    # should be used to aid in implementing
 
     # I can't use normal '_field' convention, so I dont interfere
     # with the user `x._field expressions, and '__field' mangling
@@ -16,31 +25,42 @@ class placeholders:
 
     # This 'friend member' or 'traits' paradigm is conceptually solid
     # for this use case
-    getter_name = "~placeholders"
 
-    def __new__(cls, obj):
-        return getattr(obj, placeholders.getter_name)()
+    @property
+    @abstractmethod
+    def getter_name(self):
+        pass
 
-    @staticmethod
-    def method(cls):
+    @classmethod
+    def impl(cls, target_cls):
         """
-        Utility to implement 'placeholders' protol in cls
+        Utility to implement 'placeholders' protol in target_cls
 
         eg:
-        @placeholders.method
+        @placeholders.impl
         def _(self):
             yield self._placeholder_field
         """
 
-        def _method(f):
-            setattr(cls, placeholders.getter_name, f)
+        def _impl(f):
+            setattr(target_cls, "~" + cls.__name__, f)
             return f
 
-        return _method
+        return _impl
 
-    @staticmethod
-    def hasattr(obj):
-        return hasattr(obj, placeholders.getter_name)
+    @classmethod
+    def hasattr(cls, obj):
+        return hasattr(obj, "~" + cls.__name__)
+
+
+class placeholders(protocol):
+    def __new__(cls, obj):
+        return getattr(obj, "~" + cls.__name__)()
+
+
+class substitute(protocol):
+    def __new__(cls, obj, mapping):
+        return getattr(obj, '~')
 
 
 class placeholder_meta(type):
@@ -143,9 +163,14 @@ class Placeholder(LazyOperations):
         return super().__new__(cls)
 
 
-@placeholders.method(Placeholder)  # type: ignore
+@placeholders.impl(Placeholder)  # type: ignore
 def _(self):
     yield self
+
+
+@substitute.impl(Placeholder)  # type: ignore
+def _(self, mapping):
+    pass
 
 
 class KeywordOnlyPlaceholder(Placeholder):
@@ -210,7 +235,7 @@ class Expression(LazyOperations, metaclass=ABCMeta):
         setattr(self, "~args", args)
 
 
-@placeholders.method(Expression)  # type: ignore
+@placeholders.impl(Expression)  # type: ignore
 def _(self):
     args = getattr(self, "~args")
 
@@ -322,7 +347,7 @@ class Call(Expression):
         return acc + ")"
 
 
-@placeholders.method(Call)  # type: ignore
+@placeholders.impl(Call)  # type: ignore
 def _(self):
     f = getattr(self, "~f")
     args, kwargs = getattr(self, "~args"), getattr(self, "~kwargs")
