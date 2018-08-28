@@ -1,6 +1,7 @@
 from abc import ABCMeta
 
 from .util import slice_repr
+from .protocols import substitute, placeholders
 
 
 class LazyOperations:
@@ -55,12 +56,16 @@ class Expression(LazyOperations, metaclass=ABCMeta):
         setattr(self, "~args", args)
 
     def _placeholders_(self):
-        from .protocols import placeholders
-
         args = getattr(self, "~args")
 
         for el in map(placeholders, args):
             yield from el
+
+    def _substitute_(self, cases):
+        _ = getattr(self, "~args")
+        _ = (substitute(el, cases) for el in _)
+
+        return self.__class__(*_)
 
 
 class Associative(Expression):
@@ -167,11 +172,18 @@ class Call(Expression):
         return acc + ")"
 
     def _placeholders_(self):
-        from .protocols import placeholders
-
         f = getattr(self, "~f")
         args, kwargs = getattr(self, "~args"), getattr(self, "~kwargs")
 
         all_args = [f, *args, *kwargs.values()]
         for el in map(placeholders, all_args):
             yield from el
+
+    def _substitute_(self, cases):
+        f = getattr(self, "~f")
+        args = getattr(self, "~args")
+        kwargs = getattr(self, "~kwargs")
+
+        return Call(
+            substitute(f, cases), *substitute(args, cases), **substitute(kwargs, cases)
+        )
