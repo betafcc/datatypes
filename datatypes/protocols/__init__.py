@@ -1,4 +1,4 @@
-from .match import match
-from .compare import compare
-from .placeholders import placeholders
-from .substitute import substitute
+from .match import match  # NOQA
+from .compare import compare  # NOQA
+from .placeholders import placeholders  # NOQA
+from .substitute import substitute  # NOQA

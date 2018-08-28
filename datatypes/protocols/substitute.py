@@ -5,12 +5,12 @@ from functools import singledispatch
 from datatypes.util import UnhasheableKeysMapping
 
 
-class substitute(object):
+class substitute:
     _obj : Any
 
     def __new__(cls, obj: Any, cases=None):
         if cases is None:
-            self = super().__new__(object)
+            self = super().__new__(cls)  # type: ignore
             self._obj = obj
             return self
 
