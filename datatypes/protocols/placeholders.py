@@ -1,9 +1,7 @@
 from typing import Any, Iterator
 
-from datatypes.placeholder import Placeholder
 
-
-def placeholders(obj: Any) -> Iterator[Placeholder]:
+def placeholders(obj: Any) -> Iterator:
     try:
         handler = type(obj)._placeholders_
     except AttributeError:

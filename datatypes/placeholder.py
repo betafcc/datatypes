@@ -1,7 +1,7 @@
 from inspect import Parameter
 from functools import lru_cache
 
-
+from .protocols import case
 from .expression import LazyOperations
 
 
@@ -62,6 +62,11 @@ class Placeholder(LazyOperations):
 
     def _substitute_(self, cases):
         return cases.get(self, self)
+
+    def _case_(self, a, b, c):
+        if self is a:
+            return case.accept(b)
+        return case.reject(c)
 
 
 class KeywordOnlyPlaceholder(Placeholder):

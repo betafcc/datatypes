@@ -38,7 +38,7 @@ class match:
 def match_handler_from_case_handler(case_handler):
     def _match_handler(obj, cases):
         _ = cases
-        _ = (case_handler(*case) for case in _)
+        _ = (case_handler(obj, *case) for case in _)
         _ = (value for did_match, value in _ if did_match)
 
         try:
