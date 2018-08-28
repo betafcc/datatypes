@@ -137,6 +137,14 @@ def slice_repr(s):
 
 
 class UnhasheableKeysMapping(Generic[A, B], abc.MutableMapping):
+    @classmethod
+    def from_getitem_arg(cls, arg: Tuple[slice, ...]):
+        if isinstance(arg, slice):
+            arg = (arg,)
+        elif isinstance(arg, tuple):
+            return cls([(s.start, s.stop) for s in arg])
+        raise TypeError
+
     def __init__(
         self, items: Iterable[Tuple[A, B]] = None, eq: Callable[[A, Any], bool] = eq
     ) -> None:
