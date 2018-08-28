@@ -170,7 +170,7 @@ class UnhasheableKeysMapping(Generic[A, B], abc.MutableMapping):
         raise KeyError(key)
 
     def __iter__(self) -> Iterator[A]:
-        yield from self.keys()
+        return (k for k, _ in self._items)
 
     def __len__(self):
         return len(self._items)

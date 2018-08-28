@@ -1,5 +1,6 @@
 import collections.abc
 from typing import Union, Tuple, Any
+from functools import singledispatch
 
 from datatypes.util import UnhasheableKeysMapping
 
@@ -34,5 +35,16 @@ def _substitute(obj, cases):
     return handler(obj, _cases)
 
 
+@singledispatch
 def default_substitute_handler(obj, cases):
     return cases.get(obj, obj)
+
+
+@default_substitute_handler.register(dict)
+def _(obj, cases):
+    return {k: substitute(v, cases) for k, v in obj.items()}
+
+
+@default_substitute_handler.register(list)
+def _(obj, cases):
+    return [substitute(el, cases) for el in obj]
