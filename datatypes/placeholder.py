@@ -6,6 +6,16 @@ from .util import slice_repr
 
 
 class placeholders:
+    # As of now, the protocol is implemented via
+    # a hidden field prefixed with '~' in the class,
+    # it works like the '@@' Symbols in JS
+
+    # I can't use normal '_field' convention, so I dont interfere
+    # with the user `x._field expressions, and '__field' mangling
+    # doesnt play well in inheritance and its conceptually weird
+
+    # This 'friend member' or 'traits' paradigm is conceptually solid
+    # for this use case
     getter_name = "~placeholders"
 
     def __new__(cls, obj):
@@ -13,6 +23,15 @@ class placeholders:
 
     @staticmethod
     def method(cls):
+        """
+        Utility to implement 'placeholders' protol in cls
+
+        eg:
+        @placeholders.method
+        def _(self):
+            yield self._placeholder_field
+        """
+
         def _method(f):
             setattr(cls, placeholders.getter_name, f)
             return f
@@ -124,7 +143,7 @@ class Placeholder(LazyOperations):
         return super().__new__(cls)
 
 
-@placeholders.method(Placeholder)
+@placeholders.method(Placeholder)  # type: ignore
 def _(self):
     yield self
 
@@ -191,7 +210,7 @@ class Expression(LazyOperations, metaclass=ABCMeta):
         setattr(self, "~args", args)
 
 
-@placeholders.method(Expression)
+@placeholders.method(Expression)  # type: ignore
 def _(self):
     args = getattr(self, "~args")
 
@@ -303,7 +322,7 @@ class Call(Expression):
         return acc + ")"
 
 
-@placeholders.method(Call)
+@placeholders.method(Call)  # type: ignore
 def _(self):
     f = getattr(self, "~f")
     args, kwargs = getattr(self, "~args"), getattr(self, "~kwargs")

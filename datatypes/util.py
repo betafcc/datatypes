@@ -1,8 +1,23 @@
 import inspect
-from functools import reduce
 from collections import abc
+from functools import reduce
 from itertools import zip_longest
-from typing import Dict, Any, Type, Callable
+from operator import eq
+from typing import (
+    Dict,
+    Any,
+    Type,
+    Callable,
+    Generic,
+    TypeVar,
+    Iterable,
+    Tuple,
+    Iterator,
+)
+
+
+A = TypeVar("A")
+B = TypeVar("B")
 
 
 def call(f):
@@ -119,3 +134,47 @@ def slice_repr(s):
     _ = (s.start, s.stop, s.step)
     _ = (repr(v) if v is not None else "" for v in _)
     return ":".join(_)
+
+
+class UnhasheableKeysMapping(Generic[A, B], abc.MutableMapping):
+    def __init__(
+        self, items: Iterable[Tuple[A, B]] = None, eq: Callable[[A, Any], bool] = eq
+    ) -> None:
+        if items is None:
+            items = []
+        self._items = list(items)
+        self._eq = eq
+
+    def __getitem__(self, key: A) -> B:
+        for k, v in self._items:
+            if self._eq(k, key):
+                return v
+        raise KeyError(key)
+
+    def __setitem__(self, key: A, value: B) -> None:
+        self._items.append((key, value))
+
+    def __delitem__(self, key: A) -> None:
+        for i, (k, v) in enumerate(self._items):
+            if self._eq(k, key):
+                del self._items[i]
+                return
+        raise KeyError(key)
+
+    def __iter__(self) -> Iterator[A]:
+        yield from self.keys()
+
+    def __len__(self):
+        return len(self._items)
+
+    def __repr__(self):
+        return "{}({})".format(self.__class__.__name__, self._items)
+
+    # def items(self):
+    #     return self._items[:]
+
+    # def keys(self) -> Iterable[A]:
+    #     return [k for k, _ in self._items]
+
+    # def values(self) -> Iterable[B]:
+    #     return [v for _, v in self._items]
