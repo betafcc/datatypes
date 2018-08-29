@@ -1,7 +1,9 @@
+import operator
 from abc import ABCMeta
+from functools import reduce
 
 from .util import slice_repr
-from .protocols import substitute, placeholders
+from .protocols import substitute, placeholders, run
 
 
 class LazyOperations:
@@ -75,6 +77,10 @@ class Associative(Expression):
         if method.startswith("__") and method.endswith("__"):
             setattr(cls, f"__r{method[2:]}", _rassociate)
 
+        cls._run_ = lambda self: reduce(
+            getattr(operator, method), map(run, getattr(self, "~args"))
+        )
+
     def __repr__(self):
         _ = map(repr, getattr(self, "~args"))
         _ = f" {getattr(self, '~symbol')} ".join(_)
@@ -126,6 +132,11 @@ class GetAttr(Expression):
         obj, attr = getattr(self, "~args")
         return f"{obj}.{attr}"
 
+    def _run_(self):
+        obj, attr = getattr(self, "~args")
+
+        return getattr(run(obj), run(attr))
+
 
 class GetItem(Expression):
     def __init__(self, obj, item):
@@ -144,6 +155,11 @@ class GetItem(Expression):
 
         else:
             return acc + ",".join(map(slice_repr, item)) + "]"
+
+    def _run_(self):
+        obj, item = getattr(self, "~args")
+
+        return getattr(run(obj), run(item))
 
 
 class Call(Expression):
@@ -187,3 +203,10 @@ class Call(Expression):
         return Call(
             substitute(f, cases), *substitute(args, cases), **substitute(kwargs, cases)
         )
+
+    def _run_(self):
+        f = getattr(self, "~f")
+        args = getattr(self, "~args")
+        kwargs = getattr(self, "~kwargs")
+
+        return f(*map(run, args), **{k: run(v) for k, v in kwargs.items()})

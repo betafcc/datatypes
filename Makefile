@@ -16,3 +16,7 @@ typecheck:
 
 test:
 	poetry run pytest
+
+
+clean:
+	find . -type d | grep -P '(\.mypy_cache$$|__pycache__$$|\.pytest_cache$$)' | xargs rm -rf
