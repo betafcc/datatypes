@@ -4,7 +4,7 @@ from types import new_class
 from dataclasses import dataclass
 from typing import Optional, Mapping, Dict, Tuple, Any, Callable
 
-from .protocols import compare
+from .protocols import compare, substitute
 
 
 def make_constructor(
@@ -16,13 +16,16 @@ def make_constructor(
     init: bool = True,
     repr: bool = True,
     compare: bool = True,
+    substitute: bool = True,
 ) -> type:
     namespace_: Mapping[str, Any]
     if namespace is None:
         namespace_ = {}
 
     namespace_ = {
-        **make_namespace(signature, init=init, repr=repr, compare=compare),
+        **make_namespace(
+            signature, init=init, repr=repr, compare=compare, substitute=substitute
+        ),
         **namespace_,  # user provided namespace will be preserved
     }
 
@@ -43,7 +46,11 @@ def make_constructor(
 
 
 def make_namespace(
-    signature: inspect.Signature, init: bool, repr: bool, compare: bool
+    signature: inspect.Signature,
+    init: bool,
+    repr: bool,
+    compare: bool,
+    substitute: bool = True,
 ) -> Dict[str, Any]:
     namespace = dict(
         __annotations__=make_annotations(signature),
@@ -52,12 +59,16 @@ def make_namespace(
             type(self) == type(other)
             and self._bound_signature == other._bound_signature
         ),
-        _compare_=default_datatype_compare,
     )
     if init:
         namespace["__init__"] = make_init(signature)
     if repr:
         namespace["__repr__"] = make_repr(signature)
+
+    if compare:
+        namespace["_compare_"] = default_datatype_compare
+    if substitute:
+        namespace["_substitute_"] = default_datatype_substitute
     # if not len(signature.parameters):
     #     # Constructors with no parameters shall be idempotent in construction
     #     # The reason is so `Nothing is Nothing()` and `match` and `fold` dont
@@ -123,3 +134,10 @@ def default_datatype_compare(self, other):
     return compare.concat(
         compare(sig_a.args, sig_b.args), compare(sig_a.kwargs, sig_b.kwargs)
     )
+
+
+def default_datatype_substitute(self, cases):
+    sig = self._bound_signature
+    args, kwargs = sig.args, sig.kwargs
+
+    return self.__class__(*substitute(args, cases), **substitute(kwargs, cases))
