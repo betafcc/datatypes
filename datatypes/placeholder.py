@@ -53,6 +53,10 @@ def _fill_slice(s):
 
 
 class Placeholder(LazyOperations):
+    # FIXME: implement __hash__ instead of this?
+    # may have problemns with non-hasheable annotations or default
+    # (eg _[0, xs:['non hasheable annotation']:[1, 2, 3]])
+    # maybe use weak map here? Maybe lru_cache already uses weak map?
     @lru_cache(None)
     def __new__(cls, *args, **kwargs):
         return super().__new__(cls)

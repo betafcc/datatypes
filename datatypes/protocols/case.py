@@ -30,6 +30,6 @@ class case:
 
 
 def default_case_handler(obj, a, b, c) -> CaseResult:
-    if obj == a:
+    if obj == a or a is ...:
         return case.accept(b)
     return case.reject(c)

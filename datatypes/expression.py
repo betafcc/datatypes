@@ -77,8 +77,12 @@ class Associative(Expression):
         if method.startswith("__") and method.endswith("__"):
             setattr(cls, f"__r{method[2:]}", _rassociate)
 
+        # turns out every subclass of this can be evaluated simply by calling
+        # its equivalent on `operator` module, reducing in the same order as provided
+        # in the constructor
         cls._run_ = lambda self: reduce(
-            getattr(operator, method), map(run, getattr(self, "~args"))
+            getattr(operator, method),  # get the equivalent operation
+            map(run, getattr(self, "~args")),  # first, run each of the args
         )
 
     def __repr__(self):
@@ -163,7 +167,7 @@ class GetItem(Expression):
 
 
 class Call(Expression):
-    def __init__(self, f, *args, **kwargs):
+    def __init__(self, f, *args, **kwargs):  # FIXME: standardize arguments keeping
         setattr(self, "~f", f)
         setattr(self, "~args", args)
         setattr(self, "~kwargs", kwargs)

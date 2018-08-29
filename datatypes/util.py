@@ -84,6 +84,7 @@ def get_environment(from_level: int) -> Dict[str, Any]:
     return reduce(lambda acc, n: {**acc, **n}, reversed(acc), {})
 
 
+# FIXME: guess I can remove this
 def ismatch(a: Any, b: Any) -> bool:
     # print(f"{a} ~= {b}")
 
