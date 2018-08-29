@@ -1,4 +1,5 @@
-from datatypes import placeholders, substitute, run, placeholder as _
+# flake8: noqa
+from datatypes import compare, placeholders, substitute, run, placeholder as _
 
 
 # TODO: test invalid constructors
@@ -47,6 +48,24 @@ def test_repr():
         (_[0, "x":int:42], "`0.x:" + repr(int) + "=42"),
     ]:
         assert repr(var) == expected
+
+
+def test_compare():
+    did_match, results = compare(_.x, 42)
+    assert did_match
+    assert results == [(_.x, 42)]
+
+    did_match, results = compare(42, _.x)
+    assert did_match
+    assert results == [(42, _.x)]
+
+    assert compare(
+        [1,   2, 3, _.y, {"a": _.z, "b": 6}, 7],
+        [1, _.x, 3,   4, {"a":   5, "b": 6}, 7]
+    ) == (True, [(2, _.x), (_.y, 4), (_.z, 5)])
+
+    did_match, result = compare([_.x, 2], [1, 2, 3])
+    assert not did_match
 
 
 def test_expressions():

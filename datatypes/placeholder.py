@@ -1,7 +1,7 @@
 from inspect import Parameter
 from functools import lru_cache
 
-from .protocols import case
+from .protocols import case, compare
 from .expression import LazyOperations
 
 
@@ -66,6 +66,12 @@ class Placeholder(LazyOperations):
 
     def _substitute_(self, cases):
         return cases.get(self, self)
+
+    def _compare_(self, other):
+        return compare.positive([(self, other)])
+
+    def _rcompare_(self, other):
+        return compare.positive([(other, self)])
 
     def _case_(self, a, b, c):
         if self is a:

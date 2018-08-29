@@ -36,9 +36,13 @@ def test_main_example():
 
 
 def test_match():
-    from datatypes import match
+    from datatypes import match, compare, placeholder as _
 
     m = Just(10)
+
+    did_match, results = compare(m, Just(_.x))
+    assert did_match
+    assert results == [(10, _.x)]
 
     assert match(m)[
         Nothing() : False, Just(1) : False, Just(10) : True, Just(11) : False
@@ -47,5 +51,5 @@ def test_match():
     assert Just(100) == match(m)[Just(10) : Just(100)]
 
 
-def test_fmap():
-    assert Just(10).fmap(lambda x: x ** 2) == Just(100)
+# def test_fmap():
+#     assert Just(10).fmap(lambda x: x ** 2) == Just(100)

@@ -4,6 +4,8 @@ from types import new_class
 from dataclasses import dataclass
 from typing import Optional, Mapping, Dict, Tuple, Any, Callable
 
+from .protocols import compare
+
 
 def make_constructor(
     cls_name: str,
@@ -13,13 +15,14 @@ def make_constructor(
     namespace: Optional[Mapping[str, Any]] = None,
     init: bool = True,
     repr: bool = True,
+    compare: bool = True,
 ) -> type:
     namespace_: Mapping[str, Any]
     if namespace is None:
         namespace_ = {}
 
     namespace_ = {
-        **make_namespace(signature, init=init, repr=repr),
+        **make_namespace(signature, init=init, repr=repr, compare=compare),
         **namespace_,  # user provided namespace will be preserved
     }
 
@@ -40,7 +43,7 @@ def make_constructor(
 
 
 def make_namespace(
-    signature: inspect.Signature, init: bool, repr: bool
+    signature: inspect.Signature, init: bool, repr: bool, compare: bool
 ) -> Dict[str, Any]:
     namespace = dict(
         __annotations__=make_annotations(signature),
@@ -49,6 +52,7 @@ def make_namespace(
             type(self) == type(other)
             and self._bound_signature == other._bound_signature
         ),
+        _compare_=default_datatype_compare,
     )
     if init:
         namespace["__init__"] = make_init(signature)
@@ -108,3 +112,14 @@ def make_repr(signature: inspect.Signature) -> Callable[[Any], str]:
             )
 
     return _repr
+
+
+def default_datatype_compare(self, other):
+    if type(self) != type(other):
+        return compare.negative()
+
+    sig_a, sig_b = self._bound_signature, other._bound_signature
+
+    return compare.concat(
+        compare(sig_a.args, sig_b.args), compare(sig_a.kwargs, sig_b.kwargs)
+    )
