@@ -6,7 +6,7 @@ from datatypes.util import UnhasheableKeysMapping
 
 
 class substitute:
-    _obj : Any
+    _obj: Any
 
     def __new__(cls, obj: Any, cases=None):
         if cases is None:
@@ -39,7 +39,10 @@ def _substitute(obj, cases):
 
 @singledispatch
 def default_substitute_handler(obj, cases):
-    return cases.get(obj, obj)
+    try:
+        return cases.get[obj]
+    except (TypeError, KeyError):
+        return obj
 
 
 @default_substitute_handler.register(dict)  # type: ignore
@@ -50,3 +53,8 @@ def _(obj, cases):
 @default_substitute_handler.register(list)  # type: ignore
 def _(obj, cases):
     return [substitute(el, cases) for el in obj]
+
+
+@default_substitute_handler.register(tuple)  # type: ignore
+def _(obj, cases):
+    return tuple(substitute(el, cases) for el in obj)
