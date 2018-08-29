@@ -4,7 +4,7 @@ from types import new_class
 from dataclasses import dataclass
 from typing import Optional, Mapping, Dict, Tuple, Any, Callable
 
-from .protocols import compare, substitute
+from .protocols import compare, substitute, case, run
 
 
 def make_constructor(
@@ -17,6 +17,7 @@ def make_constructor(
     repr: bool = True,
     compare: bool = True,
     substitute: bool = True,
+    case: bool = True,
 ) -> type:
     namespace_: Mapping[str, Any]
     if namespace is None:
@@ -24,7 +25,12 @@ def make_constructor(
 
     namespace_ = {
         **make_namespace(
-            signature, init=init, repr=repr, compare=compare, substitute=substitute
+            signature,
+            init=init,
+            repr=repr,
+            compare=compare,
+            substitute=substitute,
+            case=case,
         ),
         **namespace_,  # user provided namespace will be preserved
     }
@@ -51,6 +57,7 @@ def make_namespace(
     repr: bool,
     compare: bool,
     substitute: bool = True,
+    case: bool = True,
 ) -> Dict[str, Any]:
     namespace = dict(
         __annotations__=make_annotations(signature),
@@ -69,6 +76,8 @@ def make_namespace(
         namespace["_compare_"] = default_datatype_compare
     if substitute:
         namespace["_substitute_"] = default_datatype_substitute
+    if case:
+        namespace["_case_"] = default_datatype_case
     # if not len(signature.parameters):
     #     # Constructors with no parameters shall be idempotent in construction
     #     # The reason is so `Nothing is Nothing()` and `match` and `fold` dont
@@ -141,3 +150,15 @@ def default_datatype_substitute(self, cases):
     args, kwargs = sig.args, sig.kwargs
 
     return self.__class__(*substitute(args, cases), **substitute(kwargs, cases))
+
+
+def default_datatype_case(self, a, b, c):
+    if a is ...:
+        return case.accept(b)
+
+    did_match, results = compare(self, a)
+
+    if not did_match:
+        return case.reject(c)
+
+    return case.accept(run(substitute(b, ((v, k) for k, v in results))))

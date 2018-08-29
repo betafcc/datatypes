@@ -52,6 +52,9 @@ def test_match():
 
     assert Just(100) == match(m)[Just(10) : Just(100)]
 
+    assert 11 == match(Just(10))[Nothing() : Nothing(), Just(_.x) : _.x + 1]
+
+    assert match(Nothing())[Nothing(): True]
 
 # def test_fmap():
 #     assert Just(10).fmap(lambda x: x ** 2) == Just(100)
