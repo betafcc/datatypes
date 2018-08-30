@@ -7,14 +7,17 @@ validate:
 
 
 lint:
+	@echo "\n\n" ======== $@ ========= "\n\n"
 	poetry run flake8
 
 
 typecheck:
+	@echo "\n\n" ======== $@ ========= "\n\n"
 	poetry run mypy $(SRC)
 
 
 test:
+	@echo "\n\n" ======== $@ ========= "\n\n"
 	poetry run pytest
 
 

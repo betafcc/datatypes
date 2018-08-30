@@ -2,7 +2,7 @@ import operator
 from abc import ABCMeta
 from functools import reduce
 
-from .util import slice_repr
+from .util import slice_repr, LazyArguments
 from .protocols import substitute, placeholders, run
 
 
@@ -53,7 +53,23 @@ class LazyOperations:
         return Call(self, *args, **kwargs)
 
 
-class Expression(LazyOperations, metaclass=ABCMeta):
+class Shifts:
+    def __lshift__(self, other):
+        if isinstance(other, LazyArguments):
+            return other >> self
+        return Call(self, other)
+
+    def __rlshift__(self, other):
+        return Call(other, self)
+
+    def __rshift__(self, other):
+        return Call(other, self)
+
+    def __rrshift__(self, other):
+        return Call(self, other)
+
+
+class Expression(LazyOperations, Shifts, metaclass=ABCMeta):
     def __init__(self, *args):
         setattr(self, "~args", args)
 

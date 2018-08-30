@@ -18,6 +18,7 @@ def make_constructor(
     compare: bool = True,
     substitute: bool = True,
     case: bool = True,
+    run: bool = True,
 ) -> type:
     namespace_: Mapping[str, Any]
     if namespace is None:
@@ -31,6 +32,7 @@ def make_constructor(
             compare=compare,
             substitute=substitute,
             case=case,
+            run=run,
         ),
         **namespace_,  # user provided namespace will be preserved
     }
@@ -58,6 +60,7 @@ def make_namespace(
     compare: bool,
     substitute: bool = True,
     case: bool = True,
+    run: bool = True,
 ) -> Dict[str, Any]:
     namespace = dict(
         __annotations__=make_annotations(signature),
@@ -78,6 +81,8 @@ def make_namespace(
         namespace["_substitute_"] = default_datatype_substitute
     if case:
         namespace["_case_"] = default_datatype_case
+    if run:
+        namespace["_run_"] = default_datatype_run
     # if not len(signature.parameters):
     #     # Constructors with no parameters shall be idempotent in construction
     #     # The reason is so `Nothing is Nothing()` and `match` and `fold` dont
@@ -162,3 +167,10 @@ def default_datatype_case(self, a, b, c):
         return case.reject(c)
 
     return case.accept(run(substitute(b, ((v, k) for k, v in results))))
+
+
+def default_datatype_run(self):
+    sig = self._bound_signature
+    cls = self.__class__
+
+    return cls(*run(sig.args), **run(sig.kwargs))

@@ -1,8 +1,9 @@
 from inspect import Parameter
 from functools import lru_cache
 
+from .util import LazyArguments
 from .protocols import case, compare
-from .expression import LazyOperations
+from .expression import LazyOperations, Shifts
 
 
 class placeholder_meta(type):
@@ -31,9 +32,7 @@ class placeholder_meta(type):
         raise NotImplementedError
 
     def __call__(cls, *args, **kwargs):
-        pass
-        # TODO
-        # return FunctionOrArguments(*args, **kwargs)
+        return LazyArguments(*args, **kwargs)
 
 
 class placeholder(metaclass=placeholder_meta):
@@ -52,7 +51,7 @@ def _fill_slice(s):
     return (name, annotation, default)
 
 
-class Placeholder(LazyOperations):
+class Placeholder(LazyOperations, Shifts):
     # FIXME: implement __hash__ instead of this?
     # may have problemns with non-hasheable annotations or default
     # (eg _[0, xs:['non hasheable annotation']:[1, 2, 3]])
