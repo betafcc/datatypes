@@ -47,3 +47,28 @@ def test_match_dict():
     assert match({"a": 1, "b": 2})[
         {"a": 1, "b": 2, "c": 3}:False, {"a": 1, "b": 2}:True, {"a": 1, "b": 2}:False
     ]
+
+
+def test_match_substitutions():
+    from datatypes import placeholder as _
+
+    assert match(10)[_.x : "foo"] == "foo"
+    assert match(_.x)[_.x : 10,] == 10
+
+    assert (
+        match([1, 2, 3, 4])[
+            [1, 2, 3]:False, [1, 2, 3, 5]:False, [1, _.x, _.y, 4] : True
+        ]
+        is True
+    )
+
+    assert match([1, 2, 3, 4])[[1, _.x, _.y, 4] : _.x * _.y] == 6
+
+    assert match((1, 2, 3, 4))[(1, _.x, _.y, 4) : _.x * _.y] == 6
+
+    assert (
+        match([1, 2, 3, 4])[
+            []:[], [4, _.x, _.y, 1] : _.x / _.y, [1, _.x, _.y, 4] : _.x * _.y
+        ]
+        == 6
+    )
