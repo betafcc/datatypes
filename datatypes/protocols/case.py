@@ -44,8 +44,6 @@ def default_case_handler(obj, a, b, c) -> CaseResult:
     if not did_match:
         return case.reject(c)
 
-    print(matches)
-
     return case.accept(run(substitute(b, matches)))
 
 

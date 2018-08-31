@@ -1,5 +1,5 @@
-from typing import Optional, Dict, Any, Type, Callable
 from operator import setitem
+from typing import Optional, Dict, Any, Type, Callable, List
 
 from .annotations import annotations_to_signatures
 from .constructor import make_constructor
@@ -56,8 +56,15 @@ def _process_class(
 ):
     should_expose = expose is not None
 
+    # TODO: refactor this mess
+    signatures = [
+        *annotations_to_signatures(cls.__dict__.get('__annotations__', {})).items(),
+        *((k, v.signature) for k, v in cls.__dict__.items() if isinstance(v, ProtoConstructor)),
+    ]
+
+    constructors : List[Any]
     constructors = []
-    for cls_name, signature in annotations_to_signatures(cls.__annotations__).items():
+    for cls_name, signature in signatures:  # type: ignore
         constructor = make_constructor(
             cls_name=cls_name, signature=signature, bases=(cls,), init=init, repr=repr
         )
@@ -73,3 +80,15 @@ def _process_class(
 
     setattr(cls, "__init__", init_)
     return cls
+
+
+# TODO: handle the name of this thing or of the other module
+# (they are not related)
+def constructor(f):
+    from inspect import signature
+    return ProtoConstructor(signature(f))
+
+
+class ProtoConstructor:
+    def __init__(self, signature):
+        self.signature = signature

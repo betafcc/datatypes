@@ -32,6 +32,11 @@ def annotations_to_signatures(
     annotations = annotations.copy()
     for k in annotations:
         v = annotations[k]
+
+        if isinstance(v, dict):
+            annotations[k] = dict_to_signature(v)
+            continue
+
         if not isinstance(v, tuple) and not isinstance(v, Signature):
             annotations[k] = annotation_to_tuple(v)
 
@@ -54,5 +59,14 @@ def tuple_to_signature(t: Tuple[Annotation, ...]) -> Signature:
                 name=f"_{n}", kind=Parameter.POSITIONAL_ONLY, annotation=annotation
             )
             for n, annotation in enumerate(t)
+        ]
+    )
+
+
+def dict_to_signature(d: Dict[str, Annotation]) -> Signature:
+    return Signature(
+        [
+            Parameter(name=k, kind=Parameter.KEYWORD_ONLY, annotation=v)
+            for k, v in d.items()
         ]
     )

@@ -80,15 +80,15 @@ class Placeholder(LazyOperations, Shifts):
 
 class KeywordOnlyPlaceholder(Placeholder):
     def __init__(self, name, annotation=Parameter.empty, default=Parameter.empty):
-        self.__parameter = Parameter(
+        self._parameter = Parameter(
             name, kind=Parameter.KEYWORD_ONLY, annotation=annotation, default=default
         )
 
     def __repr__(self):
         name, annotation, default = (
-            self.__parameter.name,
-            self.__parameter.annotation,
-            self.__parameter.default,
+            self._parameter.name,
+            self._parameter.annotation,
+            self._parameter.default,
         )
 
         acc = f"`{name}"
@@ -101,18 +101,18 @@ class KeywordOnlyPlaceholder(Placeholder):
 
 class PositionalOnlyPlaceholder(Placeholder):
     def __init__(self, position):
-        self.__parameter = Parameter(f"_{position}", kind=Parameter.POSITIONAL_ONLY)
+        self._parameter = Parameter(f"_{position}", kind=Parameter.POSITIONAL_ONLY)
 
     def __repr__(self):
-        return f"`{self.__parameter.name[1:]}"
+        return f"`{self._parameter.name[1:]}"
 
 
 class PositionalOrKeywordPlaceholder(Placeholder):
     def __init__(
         self, position, name, annotation=Parameter.empty, default=Parameter.empty
     ):
-        self.__position = position
-        self.__parameter = Parameter(
+        self._position = position
+        self._parameter = Parameter(
             name,
             kind=Parameter.POSITIONAL_OR_KEYWORD,
             annotation=annotation,
@@ -121,10 +121,10 @@ class PositionalOrKeywordPlaceholder(Placeholder):
 
     def __repr__(self):
         position, name, annotation, default = (
-            self.__position,
-            self.__parameter.name,
-            self.__parameter.annotation,
-            self.__parameter.default,
+            self._position,
+            self._parameter.name,
+            self._parameter.annotation,
+            self._parameter.default,
         )
 
         acc = f"`{position}.{name}"
