@@ -1,5 +1,6 @@
 import operator
 from abc import ABCMeta
+from inspect import Signature
 from functools import reduce
 
 from .util import slice_repr, LazyArguments
@@ -51,6 +52,9 @@ class LazyOperations:
 
     def __call__(self, *args, **kwargs):
         return Call(self, *args, **kwargs)
+
+    def __invert__(self):
+        return make_function(self)
 
 
 class Shifts:
@@ -230,3 +234,42 @@ class Call(Expression):
         kwargs = getattr(self, "~kwargs")
 
         return f(*map(run, args), **{k: run(v) for k, v in kwargs.items()})
+
+
+def make_function(expression):
+    _placeholders = set(placeholders(expression))
+    _mapping = {el._parameter.name: el for el in _placeholders}
+
+    signature = signature_from_placeholders(_placeholders)
+
+    def _(*args, **kwargs):
+        _bound_signature = signature.bind(*args, **kwargs)
+        _bound_signature.apply_defaults()
+
+        return run(
+            substitute(
+                expression,
+                [(_mapping[k], v) for k, v in _bound_signature.arguments.items()],
+            )
+        )
+
+    _.__qualname__ = "<placeholder_function>"
+    _.__signature__ = signature
+    _.__doc__ = repr(expression)
+
+    return _
+
+
+def signature_from_placeholders(placeholders):
+    from .placeholder import PositionalOnlyPlaceholder, PositionalOrKeywordPlaceholder
+
+    positional = []
+    rest = []
+    for el in placeholders:
+        if isinstance(el, PositionalOnlyPlaceholder) or isinstance(
+            el, PositionalOrKeywordPlaceholder
+        ):
+            positional.append(el)
+        else:
+            rest.append(el)
+    return Signature([el._parameter for el in positional + rest])

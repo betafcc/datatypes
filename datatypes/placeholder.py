@@ -101,6 +101,7 @@ class KeywordOnlyPlaceholder(Placeholder):
 
 class PositionalOnlyPlaceholder(Placeholder):
     def __init__(self, position):
+        self._position = position
         self._parameter = Parameter(f"_{position}", kind=Parameter.POSITIONAL_ONLY)
 
     def __repr__(self):
