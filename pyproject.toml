@@ -1,11 +1,17 @@
 [tool.poetry]
 name = "datatypes"
 version = "0.1.0"
-description = ""
+description = "ADTs, pattern matching syntax and 33nd Degree Beazlean meta-magic ∴"
+license = "MIT"
 authors = ["Beta Faccion <betafcc@gmail.com>"]
 
+readme = 'README.rst'
+repository = 'https://github.com/betafcc/datatypes'
+
+keywords = ['adt', 'lazy', 'haskell', 'rust', 'pattern matching']
+
 [tool.poetry.dependencies]
-python = "*"
+python = "3.7"
 
 [tool.poetry.dev-dependencies]
 ipython = "^6.5"

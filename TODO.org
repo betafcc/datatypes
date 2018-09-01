@@ -1,3 +1,18 @@
+* Publishing [0/7]
+  - [-] Make a few example notebooks (using sys.path.append('..') trick) [2/5]
+    - [X] datatype simple example
+    - [X] placeholders examples
+    - [ ] match syntax examples
+    - [ ] datatype-advanced examples: Monads
+    - [ ] Lisp compiler
+  - [ ] Make a readme containing links to these notebooks
+  - [ ] publish to pypi
+  - [ ] Fix notebook imports
+  - [ ] Add binder link to readme
+  - [ ] Republish
+  - [ ] Search feedback
+
+
 * Notebooks [0/6]
   - [ ] Maybe monad
   - [ ] Tree functor
@@ -7,8 +22,11 @@
   - [ ] Degrees of magic (README prototype)
 
 
-* REFACTORING [0/5]
-  - [ ] normalize Expression.__init__ arguments keeping  [0/0]
+* REFACTORING [0/7]
+  - [ ] Standardize protocols implementations, use only singledispatch
+    Maybe factor out placholders package
+
+  - [ ] Standardize Expression.__init__ arguments keeping
     As of now, almost all subclasses of Expression
     can implement _run_ and other protocols by simply
     reconstructing itself with mappend arguments, that is not
@@ -17,18 +35,24 @@
   - [ ] Align every protocol that uses `f(object) [*mapping]` syntax to
         accept alternative `f(object, mapping)` the same way `substitute` does
 
+  - [ ] Use stronger types for protocol returning type
+    As of now, they are only alias of tuple, all of them should probably be Monoids
 
   - [ ] Adds __hash__ to Placeholder objects instead of that memoize thing?
-        Create an issue for this, it may be better to memoize with weakmap,
-        giving a Placeholder can have unhasheables in the annotation or default
+    Create an issue for this, it may be better to memoize with weakmap,
+    giving a Placeholder can have unhasheables in the annotation or default?
+    Maybe just fix it to be pure hasheable
+    (as everything should be) and thats the end of it
 
 
-  - [ ] Util [0/2]
+  - [ ] Util [0/3]
     - [ ] `records [a: b, c: d]` -> [(a, b), (c, d)]
     - [ ] `mapping [a: b, c: d]` -> UnhasheableKeysMapping([(a, b), (c, d)])
+    - [ ] placeholder to parameter
+    - [ ] parameter to placeholder
+      NOTE: placeholders and parameters should have a 1 to 1 relationship
 
-
-  - [ ] match and case better API [0/3]
+  - [ ] match and case better API [0/4]
     - [ ] handling of ellipsis is cumbersome,
           decide a general handling for it,
           either special case it unconditionaly of
@@ -52,17 +76,18 @@
           languages they are made of char), causing infinite
           recursion
 
+
 * tilde [0/2]
   - [ ] Add __iter__ to atom, so it returns *args
   - [ ] Adds ~ operator to atom, so it returns version with public params
   - [ ] placeholder(function) and placeholder(arg, *args, kwarg, **kwargs)
 
 
-* TESTING [0/1]
-  - [ ] Placeholder [0/3]
-    - [ ] constructors
-    - [ ] uniqueness
-    - [ ] repr
+* TESTING [2/2]
+  - [X] Placeholder [3/3]
+    - [X] constructors
+    - [X] uniqueness
+    - [X] repr
 
-  - [ ] match [/]
-    - [ ] builtin
+  - [X] match [1/1]
+    - [X] builtin

@@ -1,7 +1,7 @@
 import operator
 from abc import ABCMeta
-from inspect import Signature
 from functools import reduce
+from inspect import Signature
 
 from .util import slice_repr, LazyArguments
 from .protocols import substitute, placeholders, run
@@ -183,7 +183,7 @@ class GetItem(Expression):
     def _run_(self):
         obj, item = getattr(self, "~args")
 
-        return getattr(run(obj), run(item))
+        return operator.getitem(run(obj), run(item))
 
 
 class Call(Expression):
