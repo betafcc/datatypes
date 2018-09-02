@@ -44,6 +44,12 @@ class LazyOperations:
     def __rpow__(self, other):
         return Pow(other, self)
 
+    def __or__(self, other):
+        return Or(self, other)
+
+    def __ror__(self, other):
+        return Or(other, self)
+
     def __getattr__(self, attr):
         return GetAttr(self, attr)
 
@@ -145,6 +151,10 @@ class MatMul(Associative, symbol="@", method="__matmul__"):
 
 
 class TrueDiv(Associative, symbol="/", method="__truediv__"):
+    pass
+
+
+class Or(Associative, symbol="|", method="__or__"):
     pass
 
 
