@@ -1,5 +1,6 @@
 from operator import setitem
-from typing import Optional, Dict, Any, Type, Callable, List
+from typing import Optional, Dict, Any, Type, Callable
+from collections import OrderedDict
 
 from .annotations import annotations_to_signatures
 from .constructor import make_constructor
@@ -17,9 +18,15 @@ class datatype:
         repr: bool = True,
         expose: Optional[Dict[str, Any]] = None,
         expose_with: Callable[[Any, str, Type], None] = setitem,
+        instantiate_no_args: bool = False,
     ):
         return _datatype(
-            _cls=_cls, init=init, repr=repr, expose=expose, expose_with=expose_with
+            _cls=_cls,
+            init=init,
+            repr=repr,
+            expose=expose,
+            expose_with=expose_with,
+            instantiate_no_args=instantiate_no_args,
         )
 
     def __repr__(self):
@@ -36,10 +43,16 @@ def _datatype(
     repr: bool,
     expose: Optional[Dict[str, Any]],
     expose_with: Callable[[Any, str, Type], None],
+    instantiate_no_args: bool,
 ):
     def wrap(cls):
         return _process_class(
-            cls, init=init, repr=repr, expose=expose, expose_with=expose_with
+            cls,
+            init=init,
+            repr=repr,
+            expose=expose,
+            expose_with=expose_with,
+            instantiate_no_args=instantiate_no_args,
         )
 
     if _cls is None:
@@ -53,26 +66,39 @@ def _process_class(
     repr: bool,
     expose: Dict[str, Any],
     expose_with: Callable[[Any, str, Type], None],
+    instantiate_no_args: bool,
 ):
     should_expose = expose is not None
 
     # TODO: refactor this mess
     signatures = [
-        *annotations_to_signatures(cls.__dict__.get('__annotations__', {})).items(),
-        *((k, v.signature) for k, v in cls.__dict__.items() if isinstance(v, ProtoConstructor)),
+        *annotations_to_signatures(cls.__dict__.get("__annotations__", {})).items(),
+        *(
+            (k, v.signature)
+            for k, v in cls.__dict__.items()
+            if isinstance(v, ProtoConstructor)
+        ),
     ]
 
-    constructors : List[Any]
-    constructors = []
+    constructors : OrderedDict
+    constructors = OrderedDict()
+
     for cls_name, signature in signatures:  # type: ignore
         constructor = make_constructor(
             cls_name=cls_name, signature=signature, bases=(cls,), init=init, repr=repr
         )
 
-        setattr(cls, cls_name, constructor)
-        constructors.append(constructor)
+        if instantiate_no_args and len(signature.parameters) == 0:
+            constructor = constructor()
+
+        constructors[cls_name] = constructor
+
+    for cls_name, constructor in constructors.items():
+        setattr(cls, cls_name, constructors[cls_name])
+
         if should_expose:
             expose_with(expose, cls_name, constructor)
+
     setattr(cls, "_constructors", constructors)
 
     def init_(*args, **kwargs):
@@ -86,6 +112,7 @@ def _process_class(
 # (they are not related)
 def constructor(f):
     from inspect import signature
+
     return ProtoConstructor(signature(f))
 
 
