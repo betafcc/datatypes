@@ -47,7 +47,7 @@ def annotations_to_signatures(
 
 
 def annotation_to_tuple(a: Annotation) -> Tuple[Annotation, ...]:
-    if isinstance(a, abc.Iterable):
+    if isinstance(a, abc.Iterable) and not isinstance(a, str):
         return tuple(a)
     return (a,)
 
