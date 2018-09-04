@@ -23,6 +23,8 @@ def make_constructor(
     namespace_: Mapping[str, Any]
     if namespace is None:
         namespace_ = {}
+    else:
+        namespace_ = namespace
 
     namespace_ = {
         **make_namespace(
