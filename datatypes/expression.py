@@ -3,7 +3,7 @@ from abc import ABCMeta
 from functools import reduce
 from inspect import Signature
 
-from .util import slice_repr, LazyArguments
+from .util import slice_repr
 from .protocols import substitute, placeholders, run
 
 
@@ -77,6 +77,37 @@ class Shifts:
 
     def __rrshift__(self, other):
         return Call(self, other)
+
+
+class LazyArguments:
+    def __init__(self, *args, **kwargs):
+        self.__args = args
+        self.__kwargs = kwargs
+
+    def __rshift__(self, other):
+        return Call(other, *self.__args, **self.__kwargs)
+
+    def __rlshift__(self, other):
+        return Call(other, *self.__args, **self.__kwargs)
+
+    def __repr__(self):
+        args, kwargs = self.__args, self.__kwargs
+
+        acc = "`.("
+
+        if args:
+            args_repr = ", ".join(map(repr, args))
+        if kwargs:
+            kwargs_repr = ", ".join(f"{k}={v}" for k, v in kwargs.items())
+
+        if kwargs and args:
+            acc += f"{args_repr}, {kwargs_repr}"
+        elif args:
+            acc += args_repr
+        elif kwargs:
+            acc += kwargs_repr
+
+        return acc + ")"
 
 
 class Expression(LazyOperations, Shifts, metaclass=ABCMeta):

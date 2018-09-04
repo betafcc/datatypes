@@ -1,9 +1,8 @@
 from inspect import Parameter
 from functools import lru_cache
 
-from .util import LazyArguments
 from .protocols import case, compare
-from .expression import LazyOperations, Shifts
+from .expression import LazyOperations, Shifts, LazyArguments
 
 
 class placeholder_meta(type):
