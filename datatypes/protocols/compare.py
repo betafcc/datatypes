@@ -41,13 +41,18 @@ def homo_compare(a, b) -> CompareResult:
     return (a == b, [])
 
 
-@homo_compare.register  # type: ignore
-def _(a: collections.abc.Sequence, b: collections.abc.Sequence):
+@homo_compare.register(str)  # type: ignore
+def _(a, b):
+    return (a == b, [])
+
+
+@homo_compare.register(collections.abc.Sequence)  # type: ignore
+def _(a, b):
     return reduce(compare.concat, map(compare, a, b), (len(a) == len(b), []))
 
 
-@homo_compare.register  # type: ignore
-def _(a: dict, b: dict):
+@homo_compare.register(dict)  # type: ignore
+def _(a, b):
     keys_a, keys_b = set(a), set(b)
     keys_ab = keys_a.intersection(keys_b)
 
