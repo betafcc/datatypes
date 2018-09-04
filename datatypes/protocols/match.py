@@ -11,13 +11,13 @@ class match:
     def __init__(self, to_match: Any) -> None:
         self._to_match = to_match
 
-        try:
-            self._handler = type(to_match)._match_
-        except AttributeError:
-            pass
-        try:
-            self._handler = match_handler_from_case_handler(type(to_match)._case_)
-        except AttributeError:
+        t = type(to_match)
+
+        if hasattr(t, "_match_"):
+            self._handler = t._match_
+        elif hasattr(t, "_case_"):
+            self._handler = match_handler_from_case_handler(t._case_)
+        else:
             self._handler = match_handler_from_case_handler(default_case_handler)
 
     def __getitem__(self, cases: Tuple[slice, ...]) -> Any:
