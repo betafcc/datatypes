@@ -11,7 +11,9 @@ class compare:
         ta, tb = type(a), type(b)
 
         if hasattr(ta, "_compare_"):
-            return ta._compare_(a, b)
+            result = ta._compare_(a, b)
+            if result != NotImplemented:
+                return result
 
         if hasattr(tb, "_rcompare_"):
             return tb._rcompare_(b, a)

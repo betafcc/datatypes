@@ -143,7 +143,7 @@ def make_repr(signature: inspect.Signature) -> Callable[[Any], str]:
 
 def default_datatype_compare(self, other):
     if type(self) != type(other):
-        return compare.negative()
+        return NotImplemented
 
     sig_a, sig_b = self._bound_signature, other._bound_signature
 
